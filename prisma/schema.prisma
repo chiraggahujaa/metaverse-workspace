@@ -12,8 +12,9 @@ model User {
   email    String  @unique
   username String  @unique
   password String
-  avatarId String?
+  avatarId String? @db.ObjectId
   role     Role
+  avatar   Avatar? @relation(fields: [avatarId], references: [id])
 }
 
 model Space {
@@ -22,14 +23,17 @@ model Space {
   width     Int
   height    Int?
   thumbnail String?
+  elements  spaceElements[]
 }
 
 model spaceElements {
   id        String @id @default(auto()) @map("_id") @db.ObjectId
-  elementId String
-  spaceId   String
+  elementId String @db.ObjectId
+  spaceId   String @db.ObjectId
   x         Int
   y         Int
+  space     Space @relation(fields: [spaceId], references: [id])
+  element   Element @relation(fields: [elementId], references: [id])
 }
 
 model Element {
@@ -37,6 +41,9 @@ model Element {
   width    Int
   height   Int
   imageUrl String
+  static Boolean
+  spaces   spaceElements[]
+  mapElements mapElements[]
 }
 
 model Map {
@@ -44,20 +51,25 @@ model Map {
   width  Int
   height Int
   name   String
+  thumbnail String?
+  elements mapElements[]
 }
 
 model mapElements {
   id        String @id @default(auto()) @map("_id") @db.ObjectId
-  mapId     String
-  elementId String?
+  mapId     String @db.ObjectId
+  elementId String? @db.ObjectId
   x         Int?
   y         Int?
+  map       Map @relation(fields: [mapId], references: [id])
+  element   Element? @relation(fields: [elementId], references: [id])
 }
 
 model Avatar {
   id       String @id @default(auto()) @map("_id") @db.ObjectId
   imageUrl String?
   name     String?
+  users    User[]
 }
 
 enum Role {
