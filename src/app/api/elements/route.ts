@@ -17,7 +17,13 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const data = createElementSchema.parse(body);
+    const result = createElementSchema.safeParse(body);
+
+    if (!result.success) {
+      return NextResponse.json(result.error.errors, { status: 400 });
+    }
+
+    const data = result.data;
 
     const element = await prisma.element.create({
       data,
@@ -44,7 +50,13 @@ export async function PUT(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const data = updateElementSchema.parse(body);
+    const result = updateElementSchema.safeParse(body);
+
+    if (!result.success) {
+      return NextResponse.json(result.error.errors, { status: 400 });
+    }
+
+    const data = result.data;
 
     const element = await prisma.element.update({
       where: { id: data.id },

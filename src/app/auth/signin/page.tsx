@@ -3,7 +3,7 @@
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import clsx from "clsx";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 export default function SignInPage() {
   const router = useRouter();

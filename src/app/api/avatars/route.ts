@@ -31,10 +31,14 @@ export async function POST(req: NextRequest) {
 
     try {
         const body = await req.json();
-        const data = createAvatarSchema.parse(body);
+        const result = createAvatarSchema.safeParse(body);
+
+        if (!result.success) {
+            return NextResponse.json(result.error.errors, { status: 400 });
+        }
 
         const avatar = await prisma.avatar.create({
-            data,
+            data: result.data,
         });
 
         return NextResponse.json({ avatarId: avatar.id }, { status: 201 });
@@ -50,11 +54,15 @@ export async function PUT(req: NextRequest) {
 
     try {
         const body = await req.json();
-        const data = updateAvatarSchema.parse(body);
+        const result = updateAvatarSchema.safeParse(body);
+
+        if (!result.success) {
+            return NextResponse.json(result.error.errors, { status: 400 });
+        }
 
         const avatar = await prisma.avatar.update({
-            where: { id: data.id },
-            data,
+            where: { id: result.data.id },
+            data: result.data,
         });
 
         return NextResponse.json({ avatarId: avatar.id }, { status: 200 });

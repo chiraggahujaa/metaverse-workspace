@@ -39,7 +39,17 @@ export async function POST(req: Request) {
 
     try {
         const body = await req.json();
-        const data = createMapSchema.parse(body);
+        const validationResult = createMapSchema.safeParse(body);
+
+        if (!validationResult.success) {
+
+            return NextResponse.json(
+                { error: validationResult.error.format() },
+                { status: 400 }
+            );
+        }
+
+        const data = validationResult.data;
 
         const map = await prisma.map.create({
             data: {
@@ -64,7 +74,16 @@ export async function PUT(req: Request) {
 
     try {
         const body = await req.json();
-        const data = updateMapSchema.parse(body);
+        const validationResult = updateMapSchema.safeParse(body);
+
+        if (!validationResult.success) {
+            return NextResponse.json(
+                { error: validationResult.error.format() },
+                { status: 400 }
+            );
+        }
+
+        const data = validationResult.data;
 
         const map = await prisma.map.update({
             where: { id: data.id },

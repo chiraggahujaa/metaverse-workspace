@@ -10,7 +10,13 @@ const updateAvatarSchema = z.object({
 export async function PUT(req: Request) {
     try {
         const body = await req.json();
-        const { userId, avatarId } = updateAvatarSchema.parse(body);
+        const result = updateAvatarSchema.safeParse(body);
+
+        if (!result.success) {
+            return NextResponse.json({ error: result.error.errors }, { status: 400 });
+        }
+
+        const { userId, avatarId } = result.data;
 
         const user = await prisma.user.update({
             where: { id: userId },

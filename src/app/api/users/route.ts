@@ -10,20 +10,25 @@ const usersMetadataSchema = z.object({
 export async function GET(req: Request) {
     try {
         const body = await req.json();
-        const { userIds } = usersMetadataSchema.parse(body);
+        const parseResult = usersMetadataSchema.safeParse(body);
+
+        if (!parseResult.success) {
+            return NextResponse.json({ error: parseResult.error.errors }, { status: 400 });
+        }
+
+        const { userIds } = parseResult.data;
 
         const metadata = await prisma.user.findMany({
             where: { id: { in: userIds } },
-            select: { id: true, avatarId: true, avatar : true },
+            select: { id: true, avatarId: true, avatar: true },
         });
 
-        const avatars = metadata.map(async user => {
-            // const avatar = user.avatarId ? await prisma.avatar.findUnique({ where: { id: user.avatarId } }) : null;
-            return ({
+        const avatars = await Promise.all(metadata.map(async user => {
+            return {
                 userId: user.id,
                 imageUrl: user.avatarId ? user.avatar?.imageUrl : null,
-            })
-        });
+            };
+        }));
 
         return NextResponse.json({ avatars });
     } catch (error: any) {
