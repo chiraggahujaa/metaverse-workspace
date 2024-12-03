@@ -36,7 +36,6 @@ export const authOptions = {
                 const parsedCredentials = credentialsSchema.safeParse(credentials);
                 if (!parsedCredentials.success) {
                     const errorMessage = parsedCredentials.error.errors.map(err => err.message).join(', ');
-                    return null;
                     throw new Error(errorMessage);
                 }
 
@@ -45,17 +44,15 @@ export const authOptions = {
                 });
 
                 if (!user) {
-                    return null;
                     throw new Error('No user found with the provided email');
                 }
 
                 const isValid = await verifyPassword(parsedCredentials.data.password, user.password);
                 if (!isValid) {
-                    return null;
                     throw new Error('The password you entered is incorrect. Please try again.');
                 }
 
-                return { id: user.id, email: user.email, role: user.role, name: user.username };
+                return { id: user.id, email: user.email, role: user.role, username: user.username, name: user.username, avatarId: user.avatarId };
             },
         }),
     ],
@@ -69,8 +66,12 @@ export const authOptions = {
         async jwt({ token, user }: { token: any, user?: any }) {
             console.log("JWT callback called with token:", token, "and user:", user);
             if (user) {
+                token.id = user.id;
+                token.email = user.email;
                 token.role = user.role;
-                token.username = user.name;
+                token.username = user.username;
+                token.name = user.name;
+                token.avatarId = user.avatarId;
             }
             console.log('Updated token:', token);
             return token;
@@ -78,8 +79,12 @@ export const authOptions = {
         async session({ session, token }: { session: any, token: any }) {
             console.log("Session callback called with session:", session, "and token:", token);
             if (token) {
+                session.user.id = token.id;
+                session.user.email = token.email;
                 session.user.role = token.role;
                 session.user.username = token.username;
+                session.user.name = token.name;
+                session.user.avatarId = token.avatarId;
             }
             return session;
         },
@@ -90,8 +95,7 @@ export const authOptions = {
     secret: process.env.NEXTAUTH_SECRET,
 };
 
-export async function isAdmin(req: Request): Promise<boolean> {
+export async function isAdmin(): Promise<boolean> {
     const session = await getServerSession(authOptions);
-    console.log('session', session);
-    return session?.user?.role === "admin";
+    return session?.user?.role === "Admin";
 }

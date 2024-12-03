@@ -3,8 +3,10 @@
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import clsx from "clsx";
+import { useRouter } from "next/router";
 
 export default function SignInPage() {
+  const router = useRouter();
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,19 +20,20 @@ export default function SignInPage() {
 
     try {
       const result = await signIn("credentials", {
+        redirect: false,
         email,
         password,
       });
 
       console.log('res', result);
 
-      if (result?.error) {
-        setError(result.error);
+      if (result?.ok) {
+        router.push("/");
       } else {
-        console.log(result);
+        setError(result?.error || "");
       }
     } catch (error: any) {
-      setError(error.toString());
+      setError(error.response?.data?.error || error.toString());
     } finally {
       setIsLoading(false);
     }

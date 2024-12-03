@@ -33,7 +33,7 @@ const updateMapSchema = z.object({
 });
 
 export async function POST(req: Request) {
-    if (!(await isAdmin(req))) {
+    if (!(await isAdmin())) {
         return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
     }
 
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
 }
 
 export async function PUT(req: Request) {
-    if (!(await isAdmin(req))) {
+    if (!(await isAdmin())) {
         return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
     }
 

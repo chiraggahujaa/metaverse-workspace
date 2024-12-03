@@ -11,7 +11,7 @@ const createElementSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  if (!(await isAdmin(req))) {
+  if (!(await isAdmin())) {
     return NextResponse.json("Unauthorized", { status: 403 });
   }
 
@@ -38,7 +38,7 @@ const updateElementSchema = z.object({
 });
 
 export async function PUT(req: NextRequest) {
-  if (!(await isAdmin(req))) {
+  if (!(await isAdmin())) {
     return NextResponse.json("Unauthorized", { status: 403 });
   }
 

@@ -2,7 +2,9 @@
 
 import { signIn } from "next-auth/react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import clsx from "clsx";
+import axios from "axios";
 
 export default function SignUpPage() {
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -10,26 +12,45 @@ export default function SignUpPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
-    // Replace with your signup logic
-    const result = await fetch("/api/auth/signup", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, username, password }),
-    });
+    try {
+      const response = await axios.post("/api/auth/signup", {
+        email,
+        username,
+        password,
+        role: "User",
+      });
 
-    if (result.ok) {
-      // Handle successful signup (e.g., redirect to a protected page)
-      signIn("credentials", { email, password });
-    } else {
-      const data = await result.json();
-      setError(data.error || "An error occurred");
+      if (response.status === 201) {
+        // router.push("/auth/signin");
+        const result = await signIn("credentials", {
+          redirect: false,
+          email,
+          password,
+        });
+
+        if (result?.ok) {
+          router.push("/");
+        } else {
+          setError(result?.error || "");
+        }
+      } else {
+        setError(response.data.error || "An error occurred");
+      }
+    } catch (error: any) {
+      console.log(error?.response);
+      const errorMessage = error.response?.data?.error || error.toString();
+      const formattedError = errorMessage.split(",").join("\n");
+      setError(formattedError);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -148,17 +169,23 @@ export default function SignUpPage() {
                 )}
               />
             </div>
-            {error && <p className="text-red-500 text-sm">{error}</p>}
+            {error && (
+              <div className="text-red-500 text-sm whitespace-pre-line">
+                {error}
+              </div>
+            )}
             <button
               type="submit"
               className={clsx(
                 "w-full py-2 px-4 rounded-md font-medium transition-all",
                 isDarkMode
                   ? "bg-blue-500 hover:bg-blue-400 text-white"
-                  : "bg-blue-500 hover:bg-blue-400 text-white"
+                  : "bg-blue-500 hover:bg-blue-400 text-white",
+                isLoading && "opacity-50 cursor-not-allowed"
               )}
+              disabled={isLoading}
             >
-              Sign Up
+              {isLoading ? "Signing up..." : "Sign Up"}
             </button>
           </form>
         </div>

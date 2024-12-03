@@ -26,12 +26,12 @@ export async function POST(req: NextRequest) {
         const validationResult = SignupSchema.safeParse(requestData);
 
         if (!validationResult.success) {
+            const errorMessages = validationResult.error.errors.map(err => err.message).join(", ");
             return NextResponse.json(
-                { error: validationResult.error.format() },
+                { error: errorMessages },
                 { status: 400 }
             );
         }
-
         const { email, username, password, role } = validationResult.data;
 
         // Check if the user already exists by email

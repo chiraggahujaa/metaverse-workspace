@@ -25,7 +25,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-    if (!(await isAdmin(req))) {
+    if (!(await isAdmin())) {
         return NextResponse.json("Unauthorized", { status: 403 });
     }
 
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
-    if (!(await isAdmin(req))) {
+    if (!(await isAdmin())) {
         return NextResponse.json("Unauthorized", { status: 403 });
     }
 
