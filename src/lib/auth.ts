@@ -6,6 +6,21 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "@/lib/prisma";
 import { verifyPassword } from "@/lib/bcrypt";
 import { z } from "zod";
+import { sign, verify } from "jsonwebtoken";
+
+// Encode function
+async function Encode({ token, secret }: { token: any, secret: string }) {
+    return sign(token, secret);
+}
+
+// Decode function
+async function Decode({ token, secret }: { token: string, secret: string }) {
+    try {
+        return verify(token, secret, { algorithms: ["HS512"] });
+    } catch (error) {
+        return null;
+    }
+}
 
 const credentialsSchema = z.object({
     email: z.string().email('Invalid email format'),
@@ -65,6 +80,7 @@ export const authOptions = {
     callbacks: {
         async jwt({ token, user }: { token: any, user?: any }) {
             console.log("JWT callback called with token:", token, "and user:", user);
+            console.log('tokenId', token.id);
             if (user) {
                 token.id = user.id;
                 token.email = user.email;
@@ -85,9 +101,12 @@ export const authOptions = {
                 session.user.username = token.username;
                 session.user.name = token.name;
                 session.user.avatarId = token.avatarId;
+                session.token = token;
             }
             return session;
         },
+        // encode: async ({ token, secret }: any) => Encode({ token, secret }),
+        // decode: async ({ token, secret }: any) => Decode({ token, secret }),
         async redirect({ url, baseUrl }: { url: any, baseUrl: any }) {
             return baseUrl;
         },

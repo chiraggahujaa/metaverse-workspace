@@ -1,0 +1,44 @@
+.spaces-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 16px;
+}
+
+/* filepath: /c:/Users/ASUS/Desktop/Personal/metaverse-workspace/src/components/Space/Space.css */
+.space-box {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 16px;
+  width: 200px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.space-box h2 {
+  font-size: 1.5em;
+  margin-bottom: 8px;
+}
+
+.space-box p {
+  margin-bottom: 16px;
+}
+
+.space-box img {
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 16px;
+}
+
+.space-box button {
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.space-box button:hover {
+  background-color: #005bb5;
+}
