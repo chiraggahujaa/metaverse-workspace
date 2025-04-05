@@ -41,7 +41,7 @@ export default function Main() {
   }, [status]);
 
   const handleJoin = (roomName: string) => {
-    socket.emit("joinRoom", roomName);
+    // socket.emit("joinRoom", roomName);
     router.push(`/spaces/${roomName}`);
   };
 

@@ -13,10 +13,11 @@ export default class MainScene extends Phaser.Scene {
     private otherUserCircles: { [key: string]: Phaser.GameObjects.Arc };
     private otherUserLabels: { [key: string]: Phaser.GameObjects.Text };
     private otherUserAvatars: { [key: string]: Phaser.GameObjects.Image };
+    private background!: Phaser.GameObjects.TileSprite;
 
     constructor() {
         super({ key: 'MainScene' });
-        this.userRef = { x: 0, y: 0, name : 'Me'};
+        this.userRef = { x: 0, y: 0, name: 'Me' };
         this.otherUsers = [];
         this.socket = null;
         this.roomName = '';
@@ -40,23 +41,21 @@ export default class MainScene extends Phaser.Scene {
 
     preload() {
         // Load assets here
+        this.load.image('bg', '/images/wood_floor_5.jpg');
+        this.load.image('player', '/images/player.png');
     }
 
     async create() {
-        const graphics = this.add.graphics();
-        graphics.lineStyle(1, 0xffffff, 0.2);
-        for (let i = 0; i < this.scale.width; i += 50) {
-            graphics.moveTo(i, 0);
-            graphics.lineTo(i, this.scale.height);
-        }
-        for (let j = 0; j < this.scale.height; j += 50) {
-            graphics.moveTo(0, j);
-            graphics.lineTo(this.scale.width, j);
-        }
-        graphics.strokePath();
+        // Add background image and repeat it
+        this.background = this.add.tileSprite(0, 0, this.scale.width, this.scale.height, 'bg');
+        this.background.setOrigin(0, 0);
 
-        const userColor = Phaser.Display.Color.RandomRGB();
-        const userCircle = this.add.circle(this.userRef.x, this.userRef.y, 10, userColor.color);
+        // Add player image
+        const player = this.add.image(this.userRef.x, this.userRef.y, 'player');
+        const desiredHeight = 80;
+        const scale = desiredHeight / player.height;
+        player.setScale(scale);
+
         const userLabel = this.add.text(this.userRef.x, this.userRef.y - 20, this.userRef.name || 'me', { color: '#ffffff' });
 
         this.input.keyboard?.on('keydown', (event: any) => {
@@ -85,8 +84,8 @@ export default class MainScene extends Phaser.Scene {
             if (!isOccupied) {
                 this.userRef.x = newX;
                 this.userRef.y = newY;
-                userCircle.x = newX;
-                userCircle.y = newY;
+                player.x = newX;
+                player.y = newY;
                 userLabel.x = newX;
                 userLabel.y = newY - 20;
                 console.log('move', this.userRef);
@@ -127,7 +126,7 @@ export default class MainScene extends Phaser.Scene {
         }
     }
 
-    updateUserPosition(data: { socketId: string; x: number; y: number }) {
+    updateUserPosition(data: { socketId: string; x: number; y: number, userId: any }) {
         console.log('updateUserPosition', data);
         const userIndex = this.otherUsers.findIndex(user => user.socketId === data.socketId);
         if (userIndex !== -1) {
@@ -183,6 +182,9 @@ export default class MainScene extends Phaser.Scene {
     }
 
     update() {
+        // this.background.tilePositionX += 1;
+        // this.background.tilePositionY += 1;
+
         this.otherUsers.forEach(user => {
             if (!this.otherUserCircles[user.socketId]) {
                 const otherUserColor = Phaser.Display.Color.RandomRGB();

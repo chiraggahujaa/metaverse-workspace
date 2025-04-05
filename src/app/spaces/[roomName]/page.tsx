@@ -6,6 +6,7 @@ import useSocket from "@/hooks/useSocket";
 import Phaser from "phaser";
 import PreloaderScene from "@/scenes/PreloaderScene";
 import MainScene from "@/scenes/MainScene";
+import Image from 'next/image';
 
 const SpaceDetail = () => {
   const params = useParams();
@@ -51,6 +52,16 @@ const SpaceDetail = () => {
     if (!socket || !roomName) return;
 
     socket.emit("joinRoom", roomName);
+
+    socket.on("otherUsers", (users: any) => {
+      console.log("otherUsers", users);
+      setOtherUsers(users);
+    });
+
+    socket.on("userJoined", (data: any) => {
+      console.log("userJoined", data);
+      setOtherUsers((prev) => [...prev, data]);
+    });
 
     socket.on("userMoved", (data: any) => {
       console.log("userMoved", data);

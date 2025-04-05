@@ -8,7 +8,7 @@ export default async function Navbar() {
 
   return (
     <nav className="flex justify-between items-center p-4 bg-gray-800 text-white">
-      <div className="text-lg font-bold">MyApp</div>
+      <div className="text-lg font-bold">Metaverse Workspace</div>
       <div>
         {session ? (
           <div className="relative group flex items-center">

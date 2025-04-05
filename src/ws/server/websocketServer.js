@@ -1,9 +1,7 @@
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
-import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import * as jose from "jose";
 import { createClient } from "redis";
 
 dotenv.config();
@@ -22,14 +20,10 @@ app.use(express.json());
 const port = process.env.SOCKET_IO_PORT || 8080;
 
 const userSocketMap = new Map();
+const roomUsersMap = new Map();
 
 app.get("/", (req, res) => {
   res.send("Hello from Express!");
-});
-
-// TODO : Provide auth fort socket.io
-io.use(async (socket, next) => {
-  next();
 });
 
 io.on("connection", (socket) => {
@@ -39,12 +33,27 @@ io.on("connection", (socket) => {
     console.log(`User joined room: ${room} and socket id: ${socket.id}`);
     socket.join(room);
     userSocketMap.set(socket.id, room);
+
+    if (!roomUsersMap.has(room)) {
+      roomUsersMap.set(room, []);
+    }
+    roomUsersMap.get(room).push(socket.id);
+
+    const otherUsers = roomUsersMap.get(room).filter(id => id !== socket.id);
+    io.to(socket.id).emit("otherUsers", otherUsers);
+
     io.to(room).emit("userJoined", { socketId: socket.id, room });
   });
 
   socket.on("leaveRoom", (room) => {
     socket.leave(room);
     userSocketMap.delete(socket.id);
+
+    if (roomUsersMap.has(room)) {
+      const users = roomUsersMap.get(room).filter(id => id !== socket.id);
+      roomUsersMap.set(room, users);
+    }
+
     io.to(room).emit("userLeft", { socketId: socket.id, room });
   });
 
@@ -65,6 +74,11 @@ io.on("connection", (socket) => {
     if (room) {
       io.to(room).emit("userLeft", { socketId: socket.id, room });
       userSocketMap.delete(socket.id);
+
+      if (roomUsersMap.has(room)) {
+        const users = roomUsersMap.get(room).filter(id => id !== socket.id);
+        roomUsersMap.set(room, users);
+      }
     }
     console.log(`User disconnected: ${socket.id}`);
   });
